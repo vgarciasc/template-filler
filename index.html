@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<script type="text/javascript" src="test.js"></script>
+	<script type="text/javascript" src="FileSaver.js"></script>
+</head>
+<body onload="start()">
+	<input type="text" value="" id="templateurl">
+	<input type="button" id="button" onclick="getTemplate()" value="Upload Template">
+	<br>
+	<input type="text" value="" id="imageurl">
+	<input type="button" id="button" onclick="getImage()" value="Upload Image">
+	<br>
+	<input type="button" id="button" onclick="cleanCanvas()" value="Clear">
+	<br>
+	<canvas id="tutorial" width="500" height="500"></canvas>
+</body>
+</html>
