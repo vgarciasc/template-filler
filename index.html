@@ -3,19 +3,24 @@
 <head>
 	<script type="text/javascript" src="test.js"></script>
 	<script type="text/javascript" src="jquery-3.1.1.js"></script>
+	<link rel="stylesheet" href="normalize.css">
 </head>
 <body onload="start()">
 	<input type="text" value="" id="templateurl">
-	<input type="button" id="button" onclick="getTemplate()" value="Upload Template">
+	<input class="button" type="button" id="button" onclick="getTemplate()" value="Upload Template">
 	<br>
 	<input type="text" value="" id="imageurl">
-	<select id="selected_rect">
-	</select>
-	<input type="button" id="button" onclick="setImage()" value="Upload Image"> 
+	<!-- <select id="selected_rect">
+	</select> -->
+	<input class="button" type="button" id="button" onclick="setImage()" value="Upload Image"> 
+	<input class="button" type="button" id="button" onclick="removeSelectedRect()" value="Remove Selected Rectangle"> 
+	<input class="button" type="button" id="button" onclick="clearSelectedRect()" value="Clear Selected Rectangle"> 
 	<br>
-	<input type="button" id="button" onclick="resetCanvas()" value="Clear">
-	<input type="button" id="button" onclick="toggleEdit()" value="Toggle Edit">
-	<br>
+	<input class="button" type="button" id="button" onclick="resetCanvas()" value="Clear">
+	<input class="button" type="button" id="button" onclick="toggleEdit()" value="Toggle Edit">
+	<br><br><br>
 	<canvas id="tutorial" width="1000" height="1000" tabindex="1"></canvas>
+	<br><br>
+	AJSDJSADJASDOJASOJDIJAIOSDIOASJIODJIAOD<b>asdklosadka</b><i>dskaosad</i><br>
 </body>
 </html>
