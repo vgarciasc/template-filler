@@ -14,7 +14,7 @@
 body { 
   font: 11px trebuchet ms, arial, helvetica, sans-serif; 
   color: #9F927F; 
-  background: #E8E0D5 url(flora.gif) repeat-y center; 
+  background: #E8E0D5 repeat-y center; 
   margin: 10px; 
 }
 
@@ -132,13 +132,13 @@ footer a:link, footer a:visited {
   height: 42px; 
 }
 .sidebar h3.select {
-  background: transparent url(selectdesign.gif) top left no-repeat; 
+  background: transparent top left no-repeat; 
 }
 .sidebar h3.archives {
-  background: transparent url(archives.gif) top left no-repeat;
+  background: transparent top left no-repeat;
 }
 .sidebar h3.resources {
-  background: transparent url(resources.gif) top left no-repeat;
+  background: transparent top left no-repeat;
 }
 
 .sidebar ul {
@@ -148,7 +148,7 @@ footer a:link, footer a:visited {
 .sidebar li {
   height: 48px; 
   list-style-type: none;
-  background: transparent url(liBG.gif) repeat-x top left; 
+  background: transparent repeat-x top left; 
   display: block; 
   padding-left: 14px;
 }
@@ -192,27 +192,27 @@ footer a:link, footer a:visited {
 /* header graphics */
 
 .preamble { 
-  background:transparent url(road.gif) no-repeat top left;
+  background:transparent no-repeat top left;
   padding-top:30px;
 }
 
 .explanation { 
-  background:transparent url(allabout.gif) no-repeat top left;
+  background:transparent no-repeat top left;
   padding-top:30px;
 }
 
 .participation { 
-  background:transparent url(participation.gif) no-repeat top left;
+  background:transparent no-repeat top left;
   padding-top:30px;
 }
 
 .benefits { 
-  background:transparent url(benefits.gif) no-repeat top left;
+  background:transparent no-repeat top left;
   padding-top:30px;
 }
 
 .requirements { 
-  background:transparent url(requirements.gif) no-repeat top left;
+  background:transparent no-repeat top left;
   padding-top:30px;
 }
 
