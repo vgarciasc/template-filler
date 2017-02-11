@@ -126,7 +126,8 @@ function c_resize(corner) {
 }
 
 function cancelCrop() {
-	nowHidingCropCanvas = true;
+	mainCanvasActive = true;
+	cropCanvasActive = false;
 }
 
 function sendCropToMainCanvas() {
@@ -139,9 +140,8 @@ function sendCropToMainCanvas() {
 			cropRect.width,
 			cropRect.height));
 
-		cropcanvas.width = 0;
-		cropcanvas.height = 0;
-		toggleCanvases();
+			mainCanvasActive = true;
+			cropCanvasActive = false;
 	}
 }
 
