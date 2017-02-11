@@ -2,6 +2,29 @@ var mousePos = new coord(0, 0);
 
 var resizeOriginalPoint = new coord(0, 0);
 
+function onKeyDown(e) {
+	if (selectedRectIndex != -1) {
+		e.preventDefault();
+		var rect = rectList[selectedRectIndex];
+		//left
+		if (e.keyCode == 37) {
+			rect.x -= 1;
+		}
+		//up
+		if (e.keyCode == 38) {
+			rect.y -= 1;
+		}
+		//right
+		if (e.keyCode == 39) {
+			rect.x += 1;
+		}
+		//down
+		if (e.keyCode == 40) {
+			rect.y += 1;
+		}
+	}
+}
+
 function onKeyPress(e) {
 	switch (e.keyCode) {
 		//Z

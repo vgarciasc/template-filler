@@ -63,6 +63,7 @@ function start() {
 			onMouseMove();
 		}, false);
 	window.addEventListener("keypress", onKeyPress, false);
+	window.addEventListener("keydown", onKeyDown, false);
 
 	document.getElementById("imagefile").addEventListener("change", handleImage, false);
 	document.getElementById("templatefile").addEventListener("change", handleTemplate, false);
