@@ -1,38 +1,51 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<script type="text/javascript" src="render.js"></script>
+	<script type="text/javascript" src="maincanvas.js"></script>
 	<script type="text/javascript" src="actions.js"></script>
 	<script type="text/javascript" src="input.js"></script>
+	<script type="text/javascript" src="upload.js"></script>
 	<script type="text/javascript" src="templates.js"></script>
 	<script type="text/javascript" src="cropcanvas.js"></script>
 	<script type="text/javascript" src="jquery-3.1.1.js"></script>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="normalize.css">
 </head>
-<body onload="start()">
+<body>
 	<div id="container">
-	<input type="text" value="" id="templateurl">
-	<input class="button" type="button" id="button" onclick="setTemplate()" value="Upload Template">
-	<br><br>
-	Image URL: <input type="text" value="" id="imageurl"> <input class="button" type="button" id="button" onclick="setImageByURL()" value="Set Image by URL">
-	<br>
-	or File: <input type="file" value="" id="imagefile" accept="image/*"> 
-	<input class="button" type="button" id="imagefilebutton" onclick="setImageByFile()" value="Set Image by File">
-	<br><br>
-	<input type="text" value="" id="templatejson">
-	<input class="button" type="button" id="template-file" onclick="setTemplateJSON()" value="Upload Template JSON">
-	<input class="button" type="button" id="button"  onclick="getTemplateJSON()" value="Download Template JSON"> 
-	<br><br>
-	<input class="button" type="button" id="button" onclick="resetCanvas()" value="Wipe">
-	<!--<a id = "downloadcanvas"><input class="button" type="button" id="button" value="Download Canvas"></a>-->
-	<input class="button" type="button" id="button" onclick="toggleEdit()" value="Toggle Edit">
-	<br><br>
-	<canvas id="crop_canvas" width="200" height="200"></canvas>
-	<br>
-	<input class="button" type="button" id="done-cropping-btn" onclick="sendCropToMainCanvas()" value="Done">
-	<br>
-	<canvas id="main_canvas" width="1000" height="1000"></canvas>
+	<div id="start">
+		Template URL: <input type="text" value="" id="templateurl">
+		<input class="button" type="button" id="button" onclick="setTemplateByURL()" value="Set Template by URL">
+		<br>
+		or File: <input type="file" value="" id="templatefile" accept="image/*">
+		<input class="button" type="button" id="imagefilebutton" onclick="setTemplateByFile()" value="Set Template by File">
+		<hr>
+		<input type="text" value="" id="templatejson">
+		<input class="button" type="button" id="template-file" onclick="setTemplateJSON()" value="Upload Template JSON">
+		<input class="button" type="button" id="button"  onclick="getTemplateJSON()" value="Download Template JSON"> 
+		<hr>
+	</div>
+
+	<div id="main-canvas">
+		Image URL: <input type="text" value="" id="imageurl">
+		<input class="upload-image-button button" type="button" id="button" onclick="setImageByURL()" value="Set Image by URL">
+		<br>
+		or File: <input type="file" value="" id="imagefile" accept="image/*"> 
+		<input class="upload-image-button button" type="button" id="imagefilebutton" onclick="setImageByFile()" value="Set Image by File">
+		<br>
+		<br><br>
+		<input class="button" type="button" id="button" onclick="wipeEverything()" value="Wipe">
+		<!--<a id = "downloadcanvas"><input class="button" type="button" id="button" value="Download Canvas"></a>-->
+		<input class="button" type="button" id="button" onclick="toggleEdit()" value="Toggle Edit"><br><br>
+		<canvas id="main_canvas" width="1000" height="1000"></canvas>
+		<br>
+	</div>
+
+	<div id="crop-canvas">
+		<input class="button" type="button" id="button" onclick="sendCropToMainCanvas()" value="Done">
+		<input class="button" type="button" id="button" onclick="cancelCrop()" value="Cancel"><br><br>
+		<canvas id="crop_canvas" width="200" height="200"></canvas>
+	</div>
 	<br><br>
 	<b><u>INSTRUCTIONS:</u></b> upload a template and create areas with the mouse. Click in an area to select it. Once selected, upload an Image by URL or by File. You will be requested to crop the image, and then the area will be filled with the cropped image. When you are satisfied, exit edit mode, right-click the canvas and save the picture.
 	<br><br>

@@ -1,11 +1,14 @@
 var actionHistory = [];
+var waitingToRegisterMovingRectAsAction = false;
+
 var nowSelecting = false;
 var nowEditing = true;
 var nowMovingRect = false;
 var nowResizing = false;
 var resizeCorner = null;
 
-function action(rectIndex, rectCreation, imageSet, rectMove, rectOriginalPos, rectRemove, removedRect) {
+function action(rectIndex, rectCreation, imageSet, rectMove, rectOriginalPos, rectRemove, removedRect, rectResize,
+	rectOriginalSize) {
 	this.rectCreation = rectCreation;
 	this.imageSet = imageSet;
 	this.rectMove = rectMove;
@@ -13,6 +16,8 @@ function action(rectIndex, rectCreation, imageSet, rectMove, rectOriginalPos, re
 	this.rectIndex = rectIndex;
 	this.rectRemove = rectRemove;
 	this.removedRect = removedRect;
+	this.rectResize = rectResize;
+	this.rectOriginalSize = rectOriginalSize;
 }
 
 function toggleEdit() {
@@ -39,6 +44,12 @@ function undo() {
 			}
 			rectList[action.rectIndex] = action.removedRect;
 			selectedRectIndex = action.rectIndex;
+		}
+		else if (action.rectResize) {
+			rectList[action.rectIndex].width = action.rectOriginalSize.x;
+			rectList[action.rectIndex].height = action.rectOriginalSize.y;
+			rectList[action.rectIndex].x = action.rectOriginalPos.x;
+			rectList[action.rectIndex].y = action.rectOriginalPos.y;
 		}
 	}
 
@@ -72,6 +83,8 @@ function duplicateSelectedRect() {
 			false,
 			new coord(0,0),
 			false,
+			null,
+			false,
 			null);
 	}
 }
@@ -79,13 +92,6 @@ function duplicateSelectedRect() {
 function getCursorPosition(e) {
     return {x: e.offsetX,
     		y: e.offsetY}
-}
-
-function setTemplate() {
-	template.src = templateurl.value;
-	nowEditing = true;
-	// template.crossOrigin = "Anonymous";
-	resetCanvas();
 }
 
 function getSelectedRectangle() {
@@ -105,29 +111,9 @@ function setImage(rect, imgdata) {
 		false,
 		new coord(0, 0),
 		false,
+		null,
+		false,
 		null);
-}
-
-function setImageByURL() {
-	if (selectedRectIndex == -1) {
-		return;
-	}
-	
-	var img = new Image();
-	img.src = imageurl.value;
-
-	sendToCropCanvas(img);
-}
-
-function setImageByFile() {
-	if (selectedRectIndex == -1) {
-		return;
-	}
-
-	var img = new Image();
-	img = imagefile;
-
-	sendToCropCanvas(img);
 }
 
 function removeSelectedRect() {
@@ -140,7 +126,9 @@ function removeSelectedRect() {
 			false,
 			new coord(0, 0),
 			true,
-			rectList[sel]);
+			rectList[sel],
+			false,
+			null);
 
 		for (var i = sel; i < rectList.length - 1; i++) {
 			rectList[i] = rectList[i + 1];
@@ -184,6 +172,16 @@ function initResize(corner, rect) {
 				rect.y);
 			break;
 	}
+
+	actionHistory[actionHistory.length] = new action(rect.id,
+		false,
+		false,
+		false,
+		new coord(rect.x, rect.y),
+		false,
+		rect,
+		true,
+		new coord(rect.width, rect.height));
 }
 
 function clamp(num, min) {
@@ -235,4 +233,8 @@ function resize(rect) {
 
 	rect.width = clamp(rect.width, minSize);
 	rect.height = clamp(rect.height, minSize);
+}
+
+function wipeEverything() {
+	resetCanvas();
 }

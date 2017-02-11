@@ -76,6 +76,8 @@ function getMouseSelectionOffset(rect) {
 }
 
 function onMouseDown() {
+	if (!nowEditing) return;
+
 	var hover = mouseOverAnyRect();
 	if (hover != -1) {
 		selectedRectIndex = hover;
@@ -100,6 +102,8 @@ function onMouseDown() {
 }
 
 function onMouseUp() {
+	if (!nowEditing) return;
+
 	nowMovingRect = false;
 	nowSelecting = false;
 
@@ -143,11 +147,15 @@ function onMouseUp() {
 			false,
 			new coord(0, 0),
 			false,
+			null,
+			false,
 			null);
 	}
 }
 
 function onMouseMove() {	
+	if (!nowEditing) return;
+
 	var rect = rectList[selectedRectIndex];
 	
 	if (nowMovingRect) {
@@ -160,6 +168,8 @@ function onMouseMove() {
 				true,
 				new coord(rect.x,
 					rect.y),
+				false,
+				null,
 				false,
 				null);
 		}

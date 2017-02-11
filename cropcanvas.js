@@ -3,7 +3,8 @@ var currentImage = new Image();
 var cropRect;
 var cropRatio;
 
-var nowHidingCropCanvas = true;
+var mainCanvasActive = false;
+var cropCanvasActive = false;
 
 var c_nowResizing = false;
 
@@ -14,8 +15,6 @@ function crop_start() {
 			mousePos = getCursorPosition(e);
 			c_onMouseMove();
 		}, false);
-
-	$("#done-cropping-btn").hide();
 }
 
 function c_onMouseDown() {
@@ -126,6 +125,10 @@ function c_resize(corner) {
 	}
 }
 
+function cancelCrop() {
+	nowHidingCropCanvas = true;
+}
+
 function sendCropToMainCanvas() {
 	if (selectedRectIndex != -1) {
 		var rect = rectList[selectedRectIndex];
@@ -138,10 +141,8 @@ function sendCropToMainCanvas() {
 
 		cropcanvas.width = 0;
 		cropcanvas.height = 0;
-		nowHidingCropCanvas = true;
+		toggleCanvases();
 	}
-
-	$("#done-cropping-btn").toggle();
 }
 
 function sendToCropCanvas(img) {
@@ -154,18 +155,33 @@ function sendToCropCanvas(img) {
 		aux.height,
 		-2);
 	cropRatio = aux.width / aux.height;
-	nowHidingCropCanvas = false;
+	toggleCanvases();
+}
 
-	$("#done-cropping-btn").toggle();
+function manageHTMLButtons() {
+	if (mainCanvasActive) {
+		$("#main-canvas").show();
+	}
+	else {
+		$("#main-canvas").hide();
+	}
+
+	if (cropCanvasActive) {
+		$("#crop-canvas").show();
+	}
+	else {
+		$("#crop-canvas").hide();
+	}
+
+	if (selectedRectIndex != -1) {
+		$(".upload-image-button").prop("disabled", false);
+	}
+	else {
+		$(".upload-image-button").prop("disabled", true);
+	}
 }
 
 function drawCropCanvas() {
-	if (nowHidingCropCanvas) {
-		cropcanvas.width = 0;
-		cropcanvas.height = 0;
-		return;
-	}
-
 	cropcanvas.width = currentImage.width;
 	cropcanvas.height = currentImage.height;
 
@@ -195,4 +211,9 @@ function drawCropRect(ctx, rect) {
 		rect,
 		"rgba(30, 30, 30, 0.5)",
 		"rgb(0, 0, 0)");
+}
+
+function toggleCanvases() {
+	mainCanvasActive = !mainCanvasActive;
+	cropCanvasActive = !cropCanvasActive;
 }

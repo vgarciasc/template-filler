@@ -4,7 +4,6 @@ var template = new Image();
 var cropcanvas, cropcontext;
 var canvas, context, imageurl, templateurl, imagefile;
 var fps = 60;
-var waitingToRegisterMovingRectAsAction = false;
 
 var rectList = [];
 var currentRectOrigin = new coord(0, 0);
@@ -37,6 +36,16 @@ function imgdata(img, sx, sy, swidth, sheight) {
 	this.sheight = sheight;
 }
 
+window.onload = function() {
+	start();
+	crop_start();
+	setInterval(function() {
+		manageHTMLButtons();
+		drawMainCanvas();
+		drawCropCanvas();
+	}, 1000/fps);
+}
+
 function start() {
 	canvas = document.getElementById("main_canvas");
 	context = canvas.getContext("2d");
@@ -46,9 +55,6 @@ function start() {
 
 	imageurl = document.getElementById("imageurl");
 	templateurl = document.getElementById("templateurl");
-	
-	templateurl.value = "http://puu.sh/tVZt6/0a443ab360.jpg";
-	imageurl.value = "http://puu.sh/tUrXh/1cec05c440.jpg";
 
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
@@ -57,18 +63,11 @@ function start() {
 			onMouseMove();
 		}, false);
 	window.addEventListener("keypress", onKeyPress, false);
-	setInterval(function() {
-		drawMainCanvas();
-		drawCropCanvas();
-	}, 1000/fps);
 
 	document.getElementById("imagefile").addEventListener("change", handleImage, false);
-	// document.getElementById("downloadcanvas").addEventListener("click", function() {
-	// 	downloadCanvas(this, "test.png");
-	// },
-	// false);
+	document.getElementById("templatefile").addEventListener("change", handleTemplate, false);
 
-	crop_start();
+	$("#image-load").hide();
 }
 
 function cleanCanvas() {
@@ -84,12 +83,6 @@ function resetCanvas() {
 }
 
 function drawMainCanvas() {
-	if (!nowHidingCropCanvas) {
-		canvas.width = 0;
-		canvas.height = 0;
-		return;
-	}
-
 	cleanCanvas();
 	drawBackground();
 
