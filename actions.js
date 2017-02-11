@@ -1,4 +1,9 @@
 var actionHistory = [];
+var nowSelecting = false;
+var nowEditing = true;
+var nowMovingRect = false;
+var nowResizing = false;
+var resizeCorner = null;
 
 function action(rectIndex, rectCreation, imageSet, rectMove, rectOriginalPos, rectRemove, removedRect) {
 	this.rectCreation = rectCreation;
@@ -21,7 +26,7 @@ function undo() {
 			rectList.pop();
 		}
 		else if (action.imageSet) {
-			rectList[action.rectIndex].img = null;
+			rectList[action.rectIndex].imgdata = null;
 		}
 		else if (action.rectMove) {
 			rectList[action.rectIndex].x = action.rectOriginalPos.x;
@@ -42,11 +47,11 @@ function undo() {
 
 function duplicateSelectedRect() {
 	if (selectedRectIndex != -1) {
-		var hover = mouseOverRect();
 		var aux = rectList[selectedRectIndex];
+		var hover = mouseOverRect(aux);
 		
 		if (hover == selectedRectIndex) {
-			mouseSelectionOffset = getMouseSelectionOffset();
+			mouseSelectionOffset = getMouseSelectionOffset(aux);
 		}
 		else {
 			mouseSelectionOffset = new coord(aux.width / 2,
@@ -76,8 +81,10 @@ function getCursorPosition(e) {
     		y: e.offsetY}
 }
 
-function getTemplate() {
+function setTemplate() {
 	template.src = templateurl.value;
+	nowEditing = true;
+	// template.crossOrigin = "Anonymous";
 	resetCanvas();
 }
 
@@ -89,24 +96,38 @@ function getSelectedRectangle() {
 	return selectedRectIndex;
 } 
 
-function setImage() {
-	var topleft, width, height;
-	width = Math.abs(currentRectDest.x - currentRectOrigin.x);
-	height = Math.abs(currentRectDest.y - currentRectOrigin.y);
+function setImage(rect, imgdata) {
+	rect.imgdata = imgdata;
 
-	var sel = getSelectedRectangle();
-	if (sel != -1) {
-		rectList[sel].img = new Image();
-		rectList[sel].img.src = imageurl.value;
+	actionHistory[actionHistory.length] = new action(rect.id,
+		false,
+		true,
+		false,
+		new coord(0, 0),
+		false,
+		null);
+}
 
-		actionHistory[actionHistory.length] = new action(sel,
-			false,
-			true,
-			false,
-			new coord(0, 0),
-			false,
-			null);
+function setImageByURL() {
+	if (selectedRectIndex == -1) {
+		return;
 	}
+	
+	var img = new Image();
+	img.src = imageurl.value;
+
+	sendToCropCanvas(img);
+}
+
+function setImageByFile() {
+	if (selectedRectIndex == -1) {
+		return;
+	}
+
+	var img = new Image();
+	img = imagefile;
+
+	sendToCropCanvas(img);
 }
 
 function removeSelectedRect() {
@@ -141,4 +162,77 @@ function clearSelectedRect() {
 
 function resetSelectedRect() {
 	selectedRectIndex = -1;
+}
+
+function initResize(corner, rect) {
+	resizeCorner = corner;
+	switch (corner) {
+		case "topleft":
+			resizeOriginalPoint = new coord(rect.x + rect.width,
+				rect.y + rect.height);
+			break;
+		case "topright":
+			resizeOriginalPoint = new coord(rect.x,
+				rect.y + rect.height);
+			break;
+		case "bottomleft":
+			resizeOriginalPoint = new coord(rect.x + rect.width,
+				rect.y);
+			break;
+		case "bottomright":
+			resizeOriginalPoint = new coord(rect.x,
+				rect.y);
+			break;
+	}
+}
+
+function clamp(num, min) {
+	if (num < min) return min;
+	return num;
+}
+
+function resize(rect) {
+	var minSize = 20;
+
+	switch (resizeCorner) {
+		case "topleft":
+			if (resizeOriginalPoint.x - mousePos.x < minSize ||
+				resizeOriginalPoint.y - mousePos.y < minSize) {
+				break;
+			}
+
+			rect.x = mousePos.x;
+			rect.y = mousePos.y;
+
+			rect.width = resizeOriginalPoint.x - rect.x;
+			rect.height = resizeOriginalPoint.y - rect.y;
+			break;
+		case "topright":
+			if (resizeOriginalPoint.y - mousePos.y < minSize) {
+				break;
+			}
+
+			rect.y = mousePos.y;
+
+			rect.width = mousePos.x - resizeOriginalPoint.x;
+			rect.height = resizeOriginalPoint.y - rect.y;
+			break;
+		case "bottomleft":
+			if (resizeOriginalPoint.x - mousePos.x < minSize) {
+				break;
+			}
+
+			rect.x = mousePos.x;
+
+			rect.width = resizeOriginalPoint.x - rect.x;
+			rect.height = mousePos.y - resizeOriginalPoint.y;
+			break;
+		case "bottomright":
+			rect.width = mousePos.x - resizeOriginalPoint.x;
+			rect.height = mousePos.y - resizeOriginalPoint.y;
+			break;
+	}
+
+	rect.width = clamp(rect.width, minSize);
+	rect.height = clamp(rect.height, minSize);
 }

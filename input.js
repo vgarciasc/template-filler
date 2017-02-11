@@ -1,5 +1,7 @@
 var mousePos = new coord(0, 0);
 
+var resizeOriginalPoint = new coord(0, 0);
+
 function onKeyPress(e) {
 	switch (e.keyCode) {
 		//Z
@@ -22,13 +24,21 @@ function onKeyPress(e) {
 		case 119:
 			resetCanvas();
 			break;
+		//T
+		case 116:
+			toggleEdit();
+			break;
 	}
 }
 
-function mouseOverRect() {
+function mouseOverRect(rect) {
+	return (mousePos.x > rect.x && mousePos.x < rect.x + rect.width &&
+		mousePos.y > rect.y && mousePos.y < rect.y + rect.height);
+}
+
+function mouseOverAnyRect() {
 	for (var i = 0; i < rectList.length; i++) {
-		if (mousePos.x > rectList[i].x && mousePos.x < rectList[i].x + rectList[i].width &&
-		mousePos.y > rectList[i].y && mousePos.y < rectList[i].y + rectList[i].height) {
+		if (mouseOverRect(rectList[i])) {
 			return i;
 		}
 	}
@@ -36,19 +46,52 @@ function mouseOverRect() {
 	return -1;
 }
 
-function getMouseSelectionOffset() {
-	return new coord(mousePos.x - rectList[selectedRectIndex].x,
-				mousePos.y - rectList[selectedRectIndex].y);
+function mouseOverRectCorner(rect) {
+	var aux = null;
+	var offset = cornerSize/2;
+
+	if (mousePos.x > rect.x - offset && mousePos.x < rect.x + cornerSize + offset &&
+	mousePos.y > rect.y - offset && mousePos.y < rect.y + cornerSize + offset) {
+		aux = "topleft";
+	}
+	if (mousePos.x < rect.x + rect.width + offset && mousePos.x > rect.x + rect.width - cornerSize - offset &&
+	mousePos.y > rect.y - offset && mousePos.y < rect.y + cornerSize + offset) {
+		aux = "topright";
+	}
+	if (mousePos.x > rect.x - offset && mousePos.x < rect.x + cornerSize + offset &&
+	mousePos.y < rect.y + rect.height + offset && mousePos.y > rect.y + rect.height - cornerSize - offset) {
+		aux = "bottomleft";
+	}
+	if (mousePos.x < rect.x + rect.width + offset && mousePos.x > rect.x + rect.width - cornerSize - offset &&
+	mousePos.y < rect.y + rect.height + offset && mousePos.y > rect.y + rect.height - cornerSize - offset) {
+		aux = "bottomright";
+	}
+
+	return aux;
+}
+
+function getMouseSelectionOffset(rect) {
+	return new coord(mousePos.x - rect.x,
+		mousePos.y - rect.y);
 }
 
 function onMouseDown() {
-	var hover = mouseOverRect();
+	var hover = mouseOverAnyRect();
 	if (hover != -1) {
-		nowMovingRect = true;
 		selectedRectIndex = hover;
-		mouseSelectionOffset = getMouseSelectionOffset();
-		waitingToRegisterMovingRectAsAction = true;
-		return;
+		var cornerHover = mouseOverRectCorner(rectList[hover]);
+		
+		if (cornerHover) {
+			nowResizing = true;
+			initResize(cornerHover, rectList[selectedRectIndex]);
+			return;
+		}
+		else {
+			nowMovingRect = true;
+			mouseSelectionOffset = getMouseSelectionOffset(rectList[selectedRectIndex]);
+			waitingToRegisterMovingRectAsAction = true;
+			return;
+		}
 	}
 
 	nowSelecting = true;
@@ -60,7 +103,12 @@ function onMouseUp() {
 	nowMovingRect = false;
 	nowSelecting = false;
 
-	if (mouseOverRect() != -1) return;
+	if (nowResizing) {
+		nowResizing = false;
+		return;
+	}
+
+	if (mouseOverAnyRect() != -1) return;
 
 	var topleft, width, height;
 	width = Math.abs(mousePos.x - currentRectOrigin.x);
@@ -100,7 +148,9 @@ function onMouseUp() {
 }
 
 function onMouseMove() {	
-	if (nowMovingRect && selectedRectIndex != -1) {
+	var rect = rectList[selectedRectIndex];
+	
+	if (nowMovingRect) {
 		//só registra selecionar como ação se o usuário mover um retângulo
 		if (waitingToRegisterMovingRectAsAction) {
 			waitingToRegisterMovingRectAsAction = false;
@@ -108,12 +158,16 @@ function onMouseMove() {
 				false,
 				false,
 				true,
-				new coord(rectList[selectedRectIndex].x,
-					rectList[selectedRectIndex].y),
+				new coord(rect.x,
+					rect.y),
 				false,
 				null);
 		}
-		rectList[selectedRectIndex].x = mousePos.x - mouseSelectionOffset.x;
-		rectList[selectedRectIndex].y = mousePos.y - mouseSelectionOffset.y;
+		rect.x = mousePos.x - mouseSelectionOffset.x;
+		rect.y = mousePos.y - mouseSelectionOffset.y;
+	}
+
+	if (nowResizing && selectedRectIndex != -1) {
+		resize(rect);
 	}
 }

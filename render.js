@@ -1,10 +1,9 @@
 var template = new Image();
+// template.crossOrigin = "Anonymous";
 
-var canvas, context, imageurl, templateurl;
+var cropcanvas, cropcontext;
+var canvas, context, imageurl, templateurl, imagefile;
 var fps = 60;
-var nowSelecting = false;
-var nowEditing = true;
-var nowMovingRect = false;
 var waitingToRegisterMovingRectAsAction = false;
 
 var rectList = [];
@@ -14,6 +13,7 @@ var currentRectDest = new coord(0, 0);
 var selectedRectIndex = -1;
 var mouseSelectionOffset = new coord(0, 0);
 
+var cornerSize = 10;
 var rectLineWidth = 2;
 
 function coord(x, y) {
@@ -29,9 +29,21 @@ function rect(x, y, width, height, id) {
 	this.id = id;
 }
 
+function imgdata(img, sx, sy, swidth, sheight) {
+	this.img = img;
+	this.sx = sx;
+	this.sy = sy;
+	this.swidth = swidth;
+	this.sheight = sheight;
+}
+
 function start() {
-	canvas = document.getElementById("tutorial");
+	canvas = document.getElementById("main_canvas");
 	context = canvas.getContext("2d");
+
+	cropcanvas = document.getElementById("crop_canvas"); 
+	cropcontext = cropcanvas.getContext("2d");
+
 	imageurl = document.getElementById("imageurl");
 	templateurl = document.getElementById("templateurl");
 	
@@ -46,8 +58,17 @@ function start() {
 		}, false);
 	window.addEventListener("keypress", onKeyPress, false);
 	setInterval(function() {
-					draw();
-				}, 1000/fps);
+		drawMainCanvas();
+		drawCropCanvas();
+	}, 1000/fps);
+
+	document.getElementById("imagefile").addEventListener("change", handleImage, false);
+	// document.getElementById("downloadcanvas").addEventListener("click", function() {
+	// 	downloadCanvas(this, "test.png");
+	// },
+	// false);
+
+	crop_start();
 }
 
 function cleanCanvas() {
@@ -62,10 +83,15 @@ function resetCanvas() {
 	cleanCanvas();
 }
 
-function draw() {
+function drawMainCanvas() {
+	if (!nowHidingCropCanvas) {
+		canvas.width = 0;
+		canvas.height = 0;
+		return;
+	}
+
 	cleanCanvas();
 	drawBackground();
-	context.drawImage(template, 0, 0);
 
 	if (nowSelecting && nowEditing) {
 		var pos = mousePos;
@@ -99,58 +125,114 @@ function draw() {
 function drawBackground() {
 	context.fillStyle = "rgb(255, 255, 255)";
 	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.drawImage(template, 0, 0);
 }
 
-function drawImageEdit(rect) {
-	context.globalAlpha = 0.5;
-	context.drawImage(rect.img,
+function drawImageEdit(ctx, rect) {
+	ctx.globalAlpha = 0.5;
+	ctx.drawImage(rect.imgdata.img,
+		rect.imgdata.sx,
+		rect.imgdata.sy,
+		rect.imgdata.swidth,
+		rect.imgdata.sheight,
 		rect.x,
 		rect.y,
 		rect.width,
 		rect.height);
-	context.globalAlpha = 1;
+	ctx.globalAlpha = 1;
 }
 
-function drawImage(rect) {
-	context.drawImage(rect.img,
+function drawImageFull(ctx, rect) {
+	ctx.drawImage(rect.imgdata.img,
+		rect.imgdata.sx,
+		rect.imgdata.sy,
+		rect.imgdata.swidth,
+		rect.imgdata.sheight,
 		rect.x,
 		rect.y,
 		rect.width,
 		rect.height);
 }
 
-function drawRectID(rect) {
-	context.font = (rect.height * 2)/5 +"px Georgia";
-	context.fillStyle = "rgba(0, 0, 0, 0.8)"
-	context.textAlign = "center";
-	context.fillText(rect.id + 1,
+function drawRectID(ctx, rect) {
+	ctx.font = (rect.height * 2)/5 +"px Georgia";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.8)"
+	ctx.textAlign = "center";
+	ctx.fillText(rect.id + 1,
 		rect.x + rect.width / 2,
 		rect.y + rect.height / 2);
 }
 
-function drawRectSelected(rect) {
-	context.fillStyle = "rgba(105, 199, 217, 0.5)";
-	context.strokeStyle = "rgba(37, 157, 179, 0.5)";
-	context.lineWidth = rectLineWidth;
-	context.fillRect(rect.x,
+function drawRectSelected(ctx, rect) {
+	ctx.fillStyle = "rgba(105, 199, 217, 0.5)";
+	ctx.strokeStyle = "rgba(37, 157, 179, 0.5)";
+	ctx.lineWidth = rectLineWidth;
+	ctx.fillRect(rect.x,
 		rect.y,
 		rect.width,
 		rect.height);
-	context.strokeRect(rect.x,
+	ctx.strokeRect(rect.x,
 		rect.y,
 		rect.width,
 		rect.height);
+
+	drawRectCorners(ctx, rect, "rgba(37, 157, 179, 0.5)", "rgba(20, 47, 146, 0.5)");
 }
 
-function drawRectUnselected(rect) {
-	context.fillStyle = "rgba(255, 232, 79, 0.5)";
-	context.strokeStyle = "rgb(216, 188, 5)";
-	context.lineWidth = rectLineWidth;
-	context.fillRect(rect.x,
+function drawRectCorners(ctx, rect, color, selectedColor) {
+	var corner = mouseOverRectCorner(rect);
+
+  	ctx.beginPath();
+	ctx.moveTo(rect.x, rect.y);
+	ctx.lineTo(rect.x + cornerSize, rect.y);
+	ctx.lineTo(rect.x, rect.y + cornerSize);
+	ctx.closePath();
+	ctx.fillStyle = color;
+	if (corner == "topleft")
+		ctx.fillStyle = selectedColor;	
+	ctx.fill();
+
+	ctx.beginPath();
+	ctx.moveTo(rect.x + rect.width, rect.y);
+	ctx.lineTo(rect.x + rect.width - cornerSize, rect.y);
+	ctx.lineTo(rect.x + rect.width, rect.y + cornerSize);
+	ctx.closePath();
+	ctx.fillStyle = color;
+	if (corner == "topright")
+		ctx.fillStyle = selectedColor;	
+	ctx.fill();
+
+	ctx.beginPath();
+	ctx.moveTo(rect.x, rect.y + rect.height);
+	ctx.lineTo(rect.x + cornerSize, rect.y + rect.height);
+	ctx.lineTo(rect.x, rect.y + rect.height - cornerSize);
+	ctx.closePath();
+	ctx.fillStyle = color;
+	if (corner == "bottomleft")
+		ctx.fillStyle = selectedColor;	
+	ctx.fill();
+
+	ctx.beginPath();
+	ctx.moveTo(rect.x + rect.width , rect.y + rect.height);
+	ctx.lineTo(rect.x + rect.width - cornerSize, rect.y + rect.height);
+	ctx.lineTo(rect.x + rect.width , rect.y + rect.height - cornerSize);
+	ctx.closePath();
+	ctx.fillStyle = color;
+	if (corner == "bottomright")
+		ctx.fillStyle = selectedColor;	
+	ctx.fill();
+
+}
+
+function drawRectUnselected(ctx, rect) {
+	ctx.fillStyle = "rgba(255, 232, 79, 0.5)";
+	ctx.strokeStyle = "rgb(216, 188, 5)";
+	ctx.lineWidth = rectLineWidth;
+	ctx.fillRect(rect.x,
 		rect.y,
 		rect.width,
 		rect.height);
-	context.strokeRect(rect.x,
+	ctx.strokeRect(rect.x,
 		rect.y,
 		rect.width,
 		rect.height);
@@ -158,28 +240,28 @@ function drawRectUnselected(rect) {
 
 function renderRect(rect) {
 	if (nowEditing) {
-		if (rect.img) {
+		if (rect.imgdata) {
 			if (rect.id == selectedRectIndex) {
-				drawRectSelected(rect);
+				drawRectSelected(context, rect);
 			}
 
-			drawImageEdit(rect);
-			drawRectID(rect);
+			drawImageEdit(context, rect);
+			drawRectID(context, rect);
 		}
 		else {
 			if (rect.id == selectedRectIndex) {
-				drawRectSelected(rect);
+				drawRectSelected(context, rect);
 			}
 			else {
-				drawRectUnselected(rect);
+				drawRectUnselected(context, rect);
 			}
 
-			drawRectID(rect);
+			drawRectID(context, rect);
 		}
 	}
 	else {
-		if (rect.img) {
-			drawImage(rect);
+		if (rect.imgdata) {
+			drawImageFull(context, rect);
 		}
 	}
 }
