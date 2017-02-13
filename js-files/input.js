@@ -3,30 +3,32 @@ var mousePos = new coord(0, 0);
 var resizeOriginalPoint = new coord(0, 0);
 
 function onKeyDown(e) {
+	var x = e.which || e.keyCode;
 	if (selectedRectIndex != -1) {
 		e.preventDefault();
 		var rect = rectList[selectedRectIndex];
 		//left
-		if (e.keyCode == 37) {
+		if (x == 37) {
 			rect.x -= 1;
 		}
 		//up
-		if (e.keyCode == 38) {
+		if (x == 38) {
 			rect.y -= 1;
 		}
 		//right
-		if (e.keyCode == 39) {
+		if (x == 39) {
 			rect.x += 1;
 		}
 		//down
-		if (e.keyCode == 40) {
+		if (x == 40) {
 			rect.y += 1;
 		}
 	}
 }
 
 function onKeyPress(e) {
-	switch (e.keyCode) {
+	var x = e.which || e.keyCode;
+	switch (x) {
 		//Z
 		case 122:
 			undo();
