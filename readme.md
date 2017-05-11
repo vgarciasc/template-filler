@@ -1,7 +1,7 @@
 [Now on GitHub Pages!](https://vgarciasc.github.io/template-filler/html/index.html)
 
 # meme-template-filler
-> A simple JS web application created to facilitate filling 'meme templates', such as [this one](./example.png).
+> A simple JS web application created to facilitate filling 'meme templates', such as [this one](https://raw.githubusercontent.com/vgarciasc/template-filler/master/html/example.png).
 
 ## features
 - Make a selection by holding the left mouse button;
@@ -14,3 +14,5 @@
 - Save your template in a JSON and send it to your friends so they don't have to make the selections all over again;
 - Toggle the edit mode by pressing T when you are done;
 - Right click to save the canvas.
+
+![](http://i.imgur.com/n7eQQ1T.gif)
