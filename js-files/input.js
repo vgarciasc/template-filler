@@ -5,7 +5,7 @@ var resizeOriginalPoint = new coord(0, 0);
 function onKeyDown(e) {
 	var x = e.which || e.keyCode;
 	if (selectedRectIndex != -1) {
-		e.preventDefault();
+		//e.preventDefault();
 		var rect = rectList[selectedRectIndex];
 		//left
 		if (x == 37) {
